@@ -1,0 +1,72 @@
+version: "3.3"
+services:
+#################################################################################################################
+  elasticsearch:
+    container_name: 'elastic'
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.2
+    #volumes:
+    #  - "./config-dir/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro"
+    #volumes:
+    #  - type: bind
+    #    source: ./config-dir/elasticsearch.yml
+    #    target: /usr/share/elasticsearch/config/elasticsearch.yml
+    #- type: volume
+    #    source: elasticsearch
+    #    target: /usr/share/elasticsearch/data
+    environment:
+      - discovery.type=single-node
+    ports: 
+      - "9200:9200"
+      - "9300:9300"
+
+#################################################################################################################
+  kibana:
+    container_name: 'kibana'
+    image: docker.elastic.co/kibana/kibana:7.13.2
+    #volumes:
+      #- "./config-dir/kibana.yml:/usr/share/kibana/config/kibana.yml:ro"
+      #- type: bind
+      #  source: ./config-dir/kibana.yml
+      #  target: /usr/share/kibana/config/kibana.yml
+      #  read_only: true
+    ports:
+      - "5601:5601"
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+
+#################################################################################################################
+  logstash:
+    container_name: 'logstash'
+    image: docker.elastic.co/logstash/logstash:7.13.2
+    volumes:
+      #- "./config-dir/logstash.conf:/usr/share/logstash/pipeline/logstash.conf:ro"
+      - "./config-dir/logstash.conf:/config-dir/logstash.conf:ro"
+      #- "./config-dir/logstash-conf/logstash.yml:/usr/share/logstash/config/logstash.yml:ro"
+      #- type: bind
+      #  source: ./config-dir/logstash.yml
+      #  target: /usr/share/logstash/config/logstash.yml
+      #  read_only: true
+      - "./data-dir/logstash-input/:/tmp/logstash-input/:rw"
+      #- type: bind
+      #  source: ./data-dir/logstash-input/
+      #  target: /tmp/
+      #  read_only: false
+      - "./data-dir/logstash-output/:/tmp/logstash-output/:rw"
+      #- type: bind
+      #  source: ./data-dir/logstash-output/
+      #  target: /tmp/
+    command: logstash -f /config-dir/logstash.conf
+    #environment:
+     # - PIPELINE_WORKERS=1
+    depends_on:
+      - elasticsearch
+    links:
+      - elasticsearch
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.57.0/24

@@ -1,0 +1,37 @@
+version: "3"
+services:
+  elasticsearch:
+    container_name: 'elastic'
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.13.0
+    environment:
+      - discovery.type=single-node
+    ports: 
+      - "9200:9200"
+      - "9300:9300"
+  kibana:
+    container_name: 'kibana'
+    image: docker.elastic.co/kibana/kibana:7.13.0
+    ports:
+      - "5601:5601"
+    links:
+      - elasticsearch
+    depends_on:
+      - elasticsearch
+  logstash:
+    container_name: 'logstash'
+    image: docker.elastic.co/logstash/logstash:7.13.0
+    links:
+      - elasticsearch
+    volumes:
+      # to put the Logstash config in a directory called config-dir, at the same place than this file.
+      
+      - ./:/config-dir
+    command: logstash -f /config-dir/logstash.conf
+    depends_on:
+      - elasticsearch
+networks:
+  default:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.16.57.0/24

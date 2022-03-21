@@ -1,0 +1,73 @@
+version: "2.2"
+services: 
+  ###################################################### Kibana ######################################################
+  kibana:
+    container_name: 'siem-elastic-kibana'
+    restart: unless-stopped
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION}
+    environment:
+      - SERVER_NAME=kibana
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+      - ELASTICSEARCH_USERNAME=${ELASTIC_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${SIEM_PASSWORD}
+      - MONITORING_ENABLED=false
+      - LOGGING_QUIET=true
+    networks: 
+      - elastic-backend 
+    depends_on: 
+      - elasticsearch
+    cpus: 2
+    mem_limit: 1G
+
+  ###################################################### Elasticsearch ######################################################
+  elasticsearch:
+    container_name: 'siem-elastic-elasticsearch'
+    restart: unless-stopped
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION}
+    environment: 
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - ELASTIC_USERNAME=${ELASTIC_USERNAME}
+      - ELASTIC_PASSWORD=${SIEM_PASSWORD}
+      - xpack.security.enabled=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    networks: 
+      - default
+      - elastic-backend 
+    ports:
+      - 9200:9200
+    volumes: 
+      - elastic-es-data:/usr/share/elasticsearch/data
+    cpus: 4
+    mem_limit: 2G
+
+  ###################################################### Logstash ######################################################
+  logstash:
+    container_name: 'siem-elastic-logstash'
+    restart: unless-stopped
+    build: 
+      context: .
+      args: 
+        ELASTIC_VERSION: ${ELASTIC_VERSION} 
+        SIEM_USERNAME: ${ELASTIC_USERNAME}
+        SIEM_PASSWORD: ${SIEM_PASSWORD}
+        OUTPUT_CONFIG: 'conf/docker/elastic/30-output-elasticsearch.conf'
+    networks: 
+      - default
+      - elastic-backend 
+    ports:
+      - 5044:5044
+    cpus: 4
+    mem_limit: 1G
+    depends_on: 
+     - elasticsearch
+
+volumes: 
+  elastic-es-data:
+
+networks: 
+  elastic-backend:
