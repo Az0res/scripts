@@ -28,9 +28,10 @@ for line in open("/home/azo/.asn_data/exit-addresses"):
         tor_ips.add(ip)
 
 @app.get("/fast")
-async def get_asn(ip: str ):
-    #ret = await get_private(ip) | await get_is_tor_exit(ip) | await get_asn(ip)
-    return reduce(operator.or_, await asyncio.gather(get_private(ip), get_is_tor_exit(ip), get_asn(ip)))
+async def get_all_fast(ip: str ):
+    if ipaddress.ip_address(ip).is_private:
+        return {"ip": ip, "type": ipaddress.ip_address(ip).is_private}
+    return reduce(operator.or_, await asyncio.gather(get_is_private(ip), get_is_tor_exit(ip), get_asn(ip)))
 
 @app.get("/fast/get_as")
 async def get_asn(ip: str, as_networks: Optional[bool]=False ):
@@ -40,8 +41,8 @@ async def get_asn(ip: str, as_networks: Optional[bool]=False ):
     return {"ip": ip, "asn_number":asn_number, "network":network, "as name": asndb.get_as_name(asn_number)}
 
 @app.get("/fast/get_ip_type")
-async def get_private(ip: str ):
-    return {"ip": ip, "type": ("private" if ipaddress.ip_address(ip).is_private else "public")}
+async def get_is_private(ip: str):
+    return {"ip": ip, "type": ipaddress.ip_address(ip).is_private}
 
 @app.get("/fast/get_is_tor_exit")
 async def get_is_tor_exit(ip: str ):
