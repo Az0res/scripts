@@ -1,0 +1,48 @@
+import asyncio
+import operator
+import time
+from functools import reduce
+from typing import Dict, Any
+
+
+async def func1(ip: str) -> Dict[str, Any]:
+    await asyncio.sleep(1)
+    return {'func1': 'done'}
+
+
+async def func2(ip: str) -> Dict[str, Any]:
+    await asyncio.sleep(1)
+    return {'func2': 'done'}
+
+
+async def func3(ip: str) -> Dict[str, Any]:
+    await asyncio.sleep(1)
+    return {'func3': 'done'}
+
+
+async def get_stuff(ip: str) -> Dict[str, Any]:
+    return await func1(ip) | await func2(ip) | await func3(ip)
+
+
+async def get_stuff_better(ip: str) -> Dict[str, Any]:
+    return reduce(operator.or_, await asyncio.gather(func1(ip), func2(ip), func3(ip)))
+
+async def get_stuff_better_maybe(ip: str) -> Dict[str, Any]:
+    ret = {**func1(ip), **func2(ip), **func3(ip)}
+    return ret
+
+if __name__ == '__main__':
+    start = time.time()
+    out = asyncio.run(get_stuff('test'))
+    print(out)
+    print(f'"Slow" solution done in {time.time() - start:.3f} seconds.')
+
+    start = time.time()
+    out = asyncio.run(get_stuff_better('test'))
+    print(out)
+    print(f'"Faster" solution done in {time.time() - start:.3f} seconds.')
+
+    start = time.time()
+    out = asyncio.run(get_stuff_better_maybe('test'))
+    print(out)
+    print(f'"Faster" solution done in {time.time() - start:.3f} seconds.')
