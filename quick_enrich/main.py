@@ -12,10 +12,12 @@
 #todo: add tranco list top 10k
 import asyncio
 import ipaddress
+import multiprocessing
 import operator
 import socket
 from functools import reduce
 import requests
+import uvicorn as uvicorn
 
 from fastapi import FastAPI
 import pyasn
@@ -73,6 +75,9 @@ async def get_vt_results(hash:str):
 async def root():
     return {"message": "go to /docs and RTFM"}
 
+if __name__ == "__main__":
+    multiprocessing.freeze_support()
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, reload=False, workers=1)
 
 
 
