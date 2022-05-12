@@ -1,11 +1,10 @@
 # Created by Thibault and Javier
 # Requierments: pip3 install "fastapi[all]" pyasn
-# run with uvicorn fastAPI:app --reload
 
 # #download asn_data:
 # pyasn_util_download.py --latestv46
-# pyasn_util_convert.py --single <Downloaded RIB File> <ipasn_db_file_name>
-# pyasn_util_asnames.py > asname.json
+# pyasn_util_convert.py --single <Downloaded RIB File> asn_numbers.ipasn
+# pyasn_util_asnames.py > asnames.json
 # wget https://check.torproject.org/exit-addresses
 
 #todo: ad parameter for non-local queries saying I know it might leak data and trigger iocs
