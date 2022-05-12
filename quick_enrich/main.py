@@ -2,6 +2,12 @@
 # Requierments: pip3 install "fastapi[all]" pyasn
 # run with uvicorn fastAPI:app --reload
 
+# #download asn_data:
+# pyasn_util_download.py --latestv46
+# pyasn_util_convert.py --single <Downloaded RIB File> <ipasn_db_file_name>
+# pyasn_util_asnames.py > asname.json
+# wget https://check.torproject.org/exit-addresses
+
 #todo: ad parameter for non-local queries saying I know it might leak data and trigger iocs
 #todo: add tranco list top 10k
 import asyncio
@@ -69,8 +75,4 @@ async def root():
 
 
 
-# #download asn_data:
-# pyasn_util_download.py --latestv46
-# pyasn_util_convert.py --single <Downloaded RIB File> <ipasn_db_file_name>
-# pyasn_util_asnames.py > asname.json
-# wget https://check.torproject.org/exit-addresses
+
